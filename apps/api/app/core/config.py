@@ -11,7 +11,7 @@ class Settings(BaseSettings):
         "@localhost:5433/multiproject_rag"
     )
 
-    cors_origins: str = "http://localhost:5173,http://localhost:3002"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_timeout: int = 120

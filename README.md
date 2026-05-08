@@ -8,7 +8,7 @@ RAG (Retrieval-Augmented Generation) system for multiple isolated projects — e
 ┌──────────────────────────────────────────────────────┐
 │  apps/web/admin (Next.js)     apps/web/public (Vite) │
 │  Admin dashboard              End-user Q&A           │
-│  port 3002                    port 5173              │
+│  port 3000                    port 5173              │
 └──────────────┬──────────────────┬────────────────────┘
                │  REST / SSE      │  REST / SSE
                ▼                  ▼
@@ -75,14 +75,17 @@ multiproject-rag/
 ## Key features
 
 ### Per-project isolation
+
 Each project has its own document set, FAQ entries, chat sessions, system prompt, and LLM configuration. Nothing leaks between projects.
 
 ### Document ingestion pipeline
+
 1. Upload a PDF (or other format) → raw file stored
 2. Click **Ingest** → PDF parsed, text split into chunks (~segment-level), each chunk embedded via Ollama (`mxbai-embed-large`, 1024-dim)
 3. Chunks stored in `document_chunks` with pgvector embeddings
 
 ### Hybrid retrieval
+
 Queries retrieve relevant chunks using a **weighted combination** (configurable in `retriever.py`):
 
 - **Vector similarity** (60%): cosine distance via pgvector `<=>` operator
@@ -91,27 +94,31 @@ Queries retrieve relevant chunks using a **weighted combination** (configurable 
 FAQ entries are stored with embeddings too and participate in the same retrieval query via `UNION ALL` — the model sees both document chunks and FAQ entries in the same ranked context.
 
 ### Multi-provider LLM
+
 Each project can be assigned its own LLM provider, model, and API key via the admin Settings tab. Supported providers:
 
-| Provider   | API format             | When to use                |
-|------------|------------------------|----------------------------|
-| Ollama     | Native `/api/chat`     | Local dev, no API key      |
-| OpenAI     | `/v1/chat/completions` | GPT-4o, GPT-4.1            |
-| Anthropic  | `/v1/messages`         | Claude Opus 4.7, Sonnet    |
-| Google     | OpenAI-compat endpoint | Gemini 2.5 Flash/Pro       |
-| DeepSeek   | `/v1/chat/completions` | DeepSeek-V3, R1            |
+| Provider  | API format             | When to use             |
+| --------- | ---------------------- | ----------------------- |
+| Ollama    | Native `/api/chat`     | Local dev, no API key   |
+| OpenAI    | `/v1/chat/completions` | GPT-4o, GPT-4.1         |
+| Anthropic | `/v1/messages`         | Claude Opus 4.7, Sonnet |
+| Google    | OpenAI-compat endpoint | Gemini 2.5 Flash/Pro    |
+| DeepSeek  | `/v1/chat/completions` | DeepSeek-V3, R1         |
 
 If no provider is set, the project falls back to the global Ollama instance from `config.py`.
 
 ### Chat with source citations
+
 - Streaming (SSE) responses via the `/chat/stream` endpoint
 - Each response includes ranked sources showing which document chunk or FAQ was used
 - Sessions persist across multiple messages for conversation continuity
 
 ### FAQ management
+
 Structured Q&A pairs per project. FAQs are embedded and included in retrieval, so the model can cite them alongside document chunks. Useful for regulatory disclaimers, known edge cases, or internal terminology.
 
 ### Custom system prompts
+
 Projects can define a custom system prompt (e.g. glossary mappings like "prêmio instantâneo = vale-brinde"). The custom prompt is **prepended** to the default RAG instructions so the model always retains the "answer from context" constraint.
 
 ## Architecture decisions
@@ -166,10 +173,11 @@ pnpm install   # From the repo root; installs all workspace packages
 ### 4. Start the admin dashboard
 
 ```bash
-pnpm dev:admin   # → http://localhost:3002
+pnpm dev:admin   # → http://localhost:3000
 ```
 
 Use the admin to:
+
 - Create a project
 - Upload documents (PDFs)
 - Click **Ingest** on each document to index it
@@ -199,47 +207,47 @@ pnpm dev:admin & pnpm dev:public
 
 ## Environment variables (API)
 
-| Variable | Default | Description |
-|---|---|---|
-| `APP_ENV` | `development` | Environment (`development` / `production`) |
-| `ADMIN_API_TOKEN` | `dev-admin-token` | Bearer token for admin endpoints |
-| `DATABASE_URL` | `postgresql+psycopg://multiproject:multiproject@localhost:5433/multiproject_rag` | PostgreSQL connection string |
-| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3002` | Allowed CORS origins (comma-separated) |
-| `STORAGE_DIR` | `storage` | Uploaded file storage directory |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `EMBEDDING_MODEL` | `mxbai-embed-large` | Ollama model for embeddings |
-| `CHAT_MODEL` | `llama3.1:8b` | Default chat model (when no per-project model) |
-| `LLM_TEMPERATURE` | `0.0` | LLM temperature for all providers |
-| `MAX_UPLOAD_SIZE_MB` | `20` | Max file upload size |
-| `MAX_RETRIEVAL_CHUNKS` | `8` | Max chunks retrieved per query |
+| Variable               | Default                                                                          | Description                                    |
+| ---------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `APP_ENV`              | `development`                                                                    | Environment (`development` / `production`)     |
+| `ADMIN_API_TOKEN`      | `dev-admin-token`                                                                | Bearer token for admin endpoints               |
+| `DATABASE_URL`         | `postgresql+psycopg://multiproject:multiproject@localhost:5433/multiproject_rag` | PostgreSQL connection string                   |
+| `CORS_ORIGINS`         | `http://localhost:5173,http://localhost:3000`                                    | Allowed CORS origins (comma-separated)         |
+| `STORAGE_DIR`          | `storage`                                                                        | Uploaded file storage directory                |
+| `OLLAMA_BASE_URL`      | `http://localhost:11434`                                                         | Ollama server URL                              |
+| `EMBEDDING_MODEL`      | `mxbai-embed-large`                                                              | Ollama model for embeddings                    |
+| `CHAT_MODEL`           | `llama3.1:8b`                                                                    | Default chat model (when no per-project model) |
+| `LLM_TEMPERATURE`      | `0.0`                                                                            | LLM temperature for all providers              |
+| `MAX_UPLOAD_SIZE_MB`   | `20`                                                                             | Max file upload size                           |
+| `MAX_RETRIEVAL_CHUNKS` | `8`                                                                              | Max chunks retrieved per query                 |
 
 ## API endpoints
 
 ### Public (no auth)
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/projects` | List all projects |
-| `GET` | `/api/projects/{id}` | Get project details |
-| `GET` | `/api/projects/{id}/faqs` | List FAQs for a project |
-| `POST` | `/api/projects/{id}/chat` | Chat with a project (non-streaming) |
+| Method | Path                             | Description                         |
+| ------ | -------------------------------- | ----------------------------------- |
+| `GET`  | `/api/projects`                  | List all projects                   |
+| `GET`  | `/api/projects/{id}`             | Get project details                 |
+| `GET`  | `/api/projects/{id}/faqs`        | List FAQs for a project             |
+| `POST` | `/api/projects/{id}/chat`        | Chat with a project (non-streaming) |
 | `POST` | `/api/projects/{id}/chat/stream` | Chat with a project (SSE streaming) |
 
 ### Admin (Bearer token)
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/projects` | Create project |
-| `PATCH` | `/api/projects/{id}` | Update project |
-| `DELETE` | `/api/projects/{id}` | Delete project |
-| `POST` | `/api/projects/{id}/documents` | Upload document |
-| `GET` | `/api/projects/{id}/documents` | List documents |
-| `POST` | `/api/projects/{id}/documents/{id}/ingest` | Ingest document (chunk + embed) |
-| `DELETE` | `/api/projects/{id}/documents/{id}` | Delete document |
-| `POST` | `/api/projects/{id}/faqs` | Create FAQ |
-| `PATCH` | `/api/projects/{id}/faqs/{id}` | Update FAQ |
-| `DELETE` | `/api/projects/{id}/faqs/{id}` | Delete FAQ |
-| `GET` | `/health` | Health check (DB + Ollama) |
+| Method   | Path                                       | Description                     |
+| -------- | ------------------------------------------ | ------------------------------- |
+| `POST`   | `/api/projects`                            | Create project                  |
+| `PATCH`  | `/api/projects/{id}`                       | Update project                  |
+| `DELETE` | `/api/projects/{id}`                       | Delete project                  |
+| `POST`   | `/api/projects/{id}/documents`             | Upload document                 |
+| `GET`    | `/api/projects/{id}/documents`             | List documents                  |
+| `POST`   | `/api/projects/{id}/documents/{id}/ingest` | Ingest document (chunk + embed) |
+| `DELETE` | `/api/projects/{id}/documents/{id}`        | Delete document                 |
+| `POST`   | `/api/projects/{id}/faqs`                  | Create FAQ                      |
+| `PATCH`  | `/api/projects/{id}/faqs/{id}`             | Update FAQ                      |
+| `DELETE` | `/api/projects/{id}/faqs/{id}`             | Delete FAQ                      |
+| `GET`    | `/health`                                  | Health check (DB + Ollama)      |
 
 ## Adding a new LLM provider
 
