@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: multiproject
       POSTGRES_DB: multiproject_rag
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

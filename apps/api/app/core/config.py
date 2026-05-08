@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     database_url: str = (
         "postgresql+psycopg://multiproject:multiproject"
-        "@localhost:5433/multiproject_rag"
+        "@localhost:5432/multiproject_rag"
     )
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"

@@ -37,7 +37,7 @@ RAG (Retrieval-Augmented Generation) system for multiple isolated projects — e
                       ▼
 ┌──────────────────────────────────────────────────────┐
 │  PostgreSQL 16 + pgvector (docker-compose)           │
-│  port 5433                                           │
+│  port 5432                                           │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -150,7 +150,7 @@ Projects can define a custom system prompt (e.g. glossary mappings like "prêmio
 docker-compose up -d
 ```
 
-This starts PostgreSQL 16 with pgvector on port **5433**.
+This starts PostgreSQL 16 with pgvector on port **5432**.
 
 ### 2. Set up the API
 
@@ -211,7 +211,7 @@ pnpm dev:admin & pnpm dev:public
 | ---------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `APP_ENV`              | `development`                                                                    | Environment (`development` / `production`)     |
 | `ADMIN_API_TOKEN`      | `dev-admin-token`                                                                | Bearer token for admin endpoints               |
-| `DATABASE_URL`         | `postgresql+psycopg://multiproject:multiproject@localhost:5433/multiproject_rag` | PostgreSQL connection string                   |
+| `DATABASE_URL`         | `postgresql+psycopg://multiproject:multiproject@localhost:5432/multiproject_rag` | PostgreSQL connection string                   |
 | `CORS_ORIGINS`         | `http://localhost:5173,http://localhost:3000`                                    | Allowed CORS origins (comma-separated)         |
 | `STORAGE_DIR`          | `storage`                                                                        | Uploaded file storage directory                |
 | `OLLAMA_BASE_URL`      | `http://localhost:11434`                                                         | Ollama server URL                              |
