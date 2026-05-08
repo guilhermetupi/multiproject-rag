@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: multiproject-rag-postgres
+    environment:
+      POSTGRES_USER: multiproject
+      POSTGRES_PASSWORD: multiproject
+      POSTGRES_DB: multiproject_rag
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,16 @@
+{
+  "name": "@multiproject-rag/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "main": "./src/api-types.ts",
+  "types": "./src/api-types.ts",
+  "exports": {
+    ".": "./src/api-types.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o src/api-types.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "latest"
+  }
+}

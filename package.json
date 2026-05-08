@@ -2,11 +2,14 @@
   "name": "multiproject-rag",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "dev": "turbo dev",
+    "dev:api": "pnpm --filter @multiproject-rag/api dev",
+    "dev:public": "pnpm --filter @multiproject-rag/public-web dev",
+    "dev:admin": "pnpm --filter @multiproject-rag/admin-web dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "format": "turbo format"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
